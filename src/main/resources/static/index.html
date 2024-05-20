@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Response Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #chart-container {
+            width: 80%;
+            max-width: 1200px;
+            margin: auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+       .bar {
+            fill: steelblue;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <div id="chart-container">
+        <h2>AI Response Visualization</h2>
+        <div id="chart"></div>
+    </div>
+
+    <script>
+        // Fetch data from the Spring Boot application
+        fetch('/ai?request=') // Replace 'yourRequestHere' with your actual request
+         .then(response => response.json())
+         .then(data => {
+                // Create a D3.js bar chart
+                const svg = d3.select("#chart")
+                 .append("svg")
+                 .attr("width", 800)
+                 .attr("height", 400);
+
+                // Scale the data
+                const xScale = d3.scaleBand()
+                 .domain(data.map((_, i) => i))
+                 .range([0, 700])
+                 .padding(0.1);
+
+                const yScale = d3.scaleLinear()
+                 .domain([0, d3.max(data)])
+                 .range([400, 0]);
+
+                // Draw bars
+                svg.selectAll(".bar")
+                 .data(data)
+                 .enter().append("rect")
+                 .attr("class", "bar")
+                 .attr("x", (d, i) => xScale(i))
+                 .attr("y", d => yScale(d))
+                 .attr("width", xScale.bandwidth())
+                 .attr("height", d => 400 - yScale(d));
+
+                // Add labels
+                svg.selectAll(".label")
+                 .data(data)
+                 .enter().append("text")
+                 .attr("class", "label")
+                 .attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2)
+                 .attr("y", d => yScale(d) - 5)
+                 .text(d => d);
+            });
+    </script>
+</body>
+</html>
